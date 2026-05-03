@@ -1,0 +1,14 @@
+sensor:
+  - platform: homeassistant
+    id: nearby_temperature
+    entity_id: sensor.room_temperature
+    internal: true
+    filters:
+      - throttle: 10s
+      - heartbeat: 2min
+    on_value:
+      then:
+        - hisense_kelon_ir.follow_me:
+            id: ac
+            temperature: !lambda "return x;"
+            enabled: true

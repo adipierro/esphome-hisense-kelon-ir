@@ -1,0 +1,49 @@
+esphome:
+  name: hisense-kelon-ir-example
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [hisense_kelon_ir]
+
+logger:
+
+remote_transmitter:
+  id: ir_tx
+  pin: GPIO4
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+remote_receiver:
+  id: ir_rx
+  pin:
+    number: GPIO16
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  tolerance: 55%
+  dump: raw
+
+climate:
+  - platform: hisense_kelon_ir
+    id: ac
+    name: "Hisense AC"
+    transmitter_id: ir_tx
+    receiver_id: ir_rx
+    ensure_power: smart
+    ensure_power_on_boot: false
+
+button:
+  - platform: template
+    name: "AC Display Off"
+    on_press:
+      then:
+        - hisense_kelon_ir.display_off:
+            id: ac

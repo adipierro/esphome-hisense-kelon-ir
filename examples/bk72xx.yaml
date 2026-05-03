@@ -1,0 +1,46 @@
+esphome:
+  name: hisense-kelon-ir-beken-example
+
+bk72xx:
+  board: generic-bk7231n-qfn32-tuya
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [hisense_kelon_ir]
+
+logger:
+
+remote_transmitter:
+  id: ir_tx
+  pin: P7
+  carrier_duty_percent: 50%
+
+remote_receiver:
+  id: ir_rx
+  pin:
+    number: P8
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  tolerance: 55%
+  dump: raw
+
+climate:
+  - platform: hisense_kelon_ir
+    id: ac
+    name: "Hisense AC"
+    transmitter_id: ir_tx
+    receiver_id: ir_rx
+    ensure_power: smart
+    ensure_power_on_boot: false
+
+button:
+  - platform: template
+    name: "AC Display Off"
+    on_press:
+      then:
+        - hisense_kelon_ir.display_off:
+            id: ac
