@@ -48,7 +48,7 @@ Kelon168Data Kelon168Protocol::make_default() {
 bool Kelon168Protocol::valid_checksum(const Kelon168Data &data) {
   if (data.state[0] != 0x83 || data.state[1] != 0x06)
     return false;
-  if (data.state[KELON168_CHECKSUM_BYTE1] != xor_bytes(&data.state[2], KELON168_CHECKSUM_BYTE1 - 1 - 2))
+  if (data.state[KELON168_CHECKSUM_BYTE1] != xor_bytes(&data.state[2], KELON168_CHECKSUM_BYTE1 - 2))
     return false;
   if (data.state[KELON168_CHECKSUM_BYTE2] !=
       xor_bytes(&data.state[KELON168_CHECKSUM_BYTE1 + 1], KELON168_CHECKSUM_BYTE2 - KELON168_CHECKSUM_BYTE1 - 1))
@@ -57,7 +57,7 @@ bool Kelon168Protocol::valid_checksum(const Kelon168Data &data) {
 }
 
 void Kelon168Protocol::checksum(Kelon168Data *data) {
-  data->state[KELON168_CHECKSUM_BYTE1] = xor_bytes(&data->state[2], KELON168_CHECKSUM_BYTE1 - 1 - 2);
+  data->state[KELON168_CHECKSUM_BYTE1] = xor_bytes(&data->state[2], KELON168_CHECKSUM_BYTE1 - 2);
   data->state[KELON168_CHECKSUM_BYTE2] =
       xor_bytes(&data->state[KELON168_CHECKSUM_BYTE1 + 1], KELON168_CHECKSUM_BYTE2 - KELON168_CHECKSUM_BYTE1 - 1);
 }

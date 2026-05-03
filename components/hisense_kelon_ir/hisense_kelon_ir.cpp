@@ -105,8 +105,10 @@ void HisenseKelonIRClimate::send_follow_me(float temperature, bool enabled) {
   }
 
   auto data = this->have_last_tx_ ? this->last_tx_ : Kelon168Protocol::make_default();
+  this->follow_me_enabled_ = enabled;
+  this->follow_me_temperature_ = static_cast<uint8_t>(lroundf(clamp(temperature, 0.0f, 50.0f)));
   data.state[11] = enabled ? 0x01 : 0x00;
-  data.state[12] = static_cast<uint8_t>(lroundf(clamp(temperature, 0.0f, 50.0f)));
+  data.state[12] = this->follow_me_temperature_;
   data.state[15] = KELON168_COMMAND_IFEEL;
   Kelon168Protocol::checksum(&data);
   this->transmit_kelon_(data);
@@ -115,6 +117,7 @@ void HisenseKelonIRClimate::send_follow_me(float temperature, bool enabled) {
 void HisenseKelonIRClimate::send_display_off() {
   auto data = this->have_last_tx_ ? this->last_tx_ : Kelon168Protocol::make_default();
   data.state[6] |= 0x20;
+  data.state[18] |= 0x10;
   data.state[15] = KELON168_COMMAND_LIGHT;
   Kelon168Protocol::checksum(&data);
   this->transmit_kelon_(data);
@@ -125,7 +128,7 @@ bool HisenseKelonIRClimate::on_receive(remote_base::RemoteReceiveData data) {
   if (!decoded.has_value())
     return false;
 
-  ESP_LOGV(TAG, "Decoded Kelon168 command 0x%02X", decoded->command());
+  ESP_LOGD(TAG, "Decoded Kelon168 command 0x%02X", decoded->command());
   this->log_changed_bytes_(*decoded);
   this->apply_received_state_(*decoded);
   return true;
@@ -134,6 +137,12 @@ bool HisenseKelonIRClimate::on_receive(remote_base::RemoteReceiveData data) {
 void HisenseKelonIRClimate::apply_received_state_(const Kelon168Data &data) {
   const uint8_t command = data.command();
   if (command == KELON168_COMMAND_LIGHT || command == KELON168_COMMAND_IFEEL) {
+    if (command == KELON168_COMMAND_IFEEL) {
+      this->follow_me_enabled_ = data.state[11] != 0;
+      this->follow_me_temperature_ = data.state[12];
+    }
+    this->last_tx_ = data;
+    this->have_last_tx_ = true;
     ESP_LOGD(TAG, "Ignoring non-climate Kelon168 command 0x%02X for climate state", command);
     return;
   }
@@ -200,6 +209,7 @@ Kelon168Data HisenseKelonIRClimate::build_state_(climate::ClimateMode mode, floa
     data.state[18] &= ~0x10;
 
   data.state[15] = command;
+  this->apply_follow_me_(&data);
   Kelon168Protocol::checksum(&data);
   return data;
 }
@@ -220,6 +230,11 @@ void HisenseKelonIRClimate::ensure_power_on_() {
   auto data = this->build_state_(mode, this->ensure_power_ == ENSURE_POWER_SUPER ? 16.0f : 23.0f, climate::CLIMATE_FAN_AUTO,
                                  climate::CLIMATE_SWING_OFF, preset, false, command);
   this->transmit_kelon_(data);
+}
+
+void HisenseKelonIRClimate::apply_follow_me_(Kelon168Data *data) const {
+  data->state[11] = this->follow_me_enabled_ ? 0x01 : 0x00;
+  data->state[12] = this->follow_me_enabled_ ? this->follow_me_temperature_ : 0x00;
 }
 
 uint8_t HisenseKelonIRClimate::encode_mode_(climate::ClimateMode mode) const {

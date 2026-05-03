@@ -26,7 +26,9 @@ remote_receiver:
       input: true
       pullup: true
   tolerance: 55%
-  dump: raw
+  dump:
+    - hisense_kelon_ir
+    - raw
 
 climate:
   - platform: hisense_kelon_ir

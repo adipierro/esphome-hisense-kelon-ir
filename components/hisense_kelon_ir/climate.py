@@ -26,6 +26,14 @@ HisenseKelonIRClimate = hisense_kelon_ir_ns.class_(
 )
 FollowMeAction = hisense_kelon_ir_ns.class_("FollowMeAction", automation.Action)
 DisplayOffAction = hisense_kelon_ir_ns.class_("DisplayOffAction", automation.Action)
+Kelon168Dumper = hisense_kelon_ir_ns.class_(
+    "Kelon168Dumper", remote_base.RemoteReceiverDumperBase
+)
+
+
+@remote_base.register_dumper("hisense_kelon_ir", Kelon168Dumper)
+def hisense_kelon_ir_dumper(var, config):
+    pass
 
 CONFIG_SCHEMA = climate_ir.climate_ir_with_receiver_schema(HisenseKelonIRClimate).extend(
     {

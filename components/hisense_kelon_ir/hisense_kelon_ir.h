@@ -42,6 +42,7 @@ class HisenseKelonIRClimate : public climate_ir::ClimateIR {
                             climate::ClimatePreset preset, bool power_toggle, uint8_t command) const;
   void transmit_kelon_(Kelon168Data data);
   void ensure_power_on_();
+  void apply_follow_me_(Kelon168Data *data) const;
   void apply_received_state_(const Kelon168Data &data);
   uint8_t encode_mode_(climate::ClimateMode mode) const;
   climate::ClimateMode decode_mode_(uint8_t mode) const;
@@ -55,7 +56,11 @@ class HisenseKelonIRClimate : public climate_ir::ClimateIR {
   bool power_known_{false};
   bool should_ensure_power_{false};
   bool ensure_power_on_boot_{false};
+  bool follow_me_enabled_{false};
+  uint8_t follow_me_temperature_{0};
 };
+
+using Kelon168Dumper = remote_base::RemoteReceiverDumper<Kelon168Protocol>;
 
 template<typename... Ts> class FollowMeAction : public Action<Ts...> {
  public:
