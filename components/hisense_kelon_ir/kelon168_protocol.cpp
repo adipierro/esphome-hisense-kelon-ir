@@ -39,7 +39,7 @@ Kelon168Data Kelon168Protocol::make_default() {
   data.state[0] = 0x83;
   data.state[1] = 0x06;
   data.state[6] = 0x80;
-  data.state[18] = 0x28;
+  data.state[18] = 0x08;
   data.state[3] = (KELON168_MODE_AUTO & 0x07) | ((23 - 16) << 4);
   checksum(&data);
   return data;
