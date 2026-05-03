@@ -64,7 +64,7 @@ template<typename... Ts> class FollowMeAction : public Action<Ts...> {
   TEMPLATABLE_VALUE(bool, enabled)
 
  protected:
-  void play(Ts... x) override {
+  void play(const Ts &...x) override {
     this->parent_->send_follow_me(this->temperature_.value(x...), this->enabled_.value_or(x..., true));
   }
 
@@ -76,7 +76,7 @@ template<typename... Ts> class DisplayOffAction : public Action<Ts...> {
   explicit DisplayOffAction(HisenseKelonIRClimate *parent) : parent_(parent) {}
 
  protected:
-  void play(Ts... x) override { this->parent_->send_display_off(); }
+  void play(const Ts &...x) override { this->parent_->send_display_off(); }
 
   HisenseKelonIRClimate *parent_;
 };

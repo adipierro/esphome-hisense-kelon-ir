@@ -1,0 +1,41 @@
+esphome:
+  name: kelon-follow-me
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [hisense_kelon_ir]
+
+logger:
+
+remote_transmitter:
+  id: ir_tx
+  pin: GPIO4
+  carrier_duty_percent: 50%
+  non_blocking: true
+
+climate:
+  - platform: hisense_kelon_ir
+    id: ac
+    name: "Hisense AC"
+    transmitter_id: ir_tx
+    ensure_power: smart
+
+sensor:
+  - platform: template
+    id: nearby_temperature
+    name: "Nearby Temperature"
+    lambda: return 24.0f;
+    update_interval: 60s
+    on_value:
+      then:
+        - hisense_kelon_ir.follow_me:
+            id: ac
+            temperature: !lambda "return x;"
+            enabled: true
