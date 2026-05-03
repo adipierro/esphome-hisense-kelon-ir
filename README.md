@@ -5,12 +5,12 @@ External ESPHome climate component for Hisense/Kelon air conditioners using the 
 This component is implemented against ESPHome's `remote_transmitter`, `remote_receiver`, and `remote_base` APIs. It does not use Arduino-only IR libraries.
 
 ## Acknowledgements
-- ESPhome for ESPhome
+- ESPhome community for ESPhome project
 - Leonardo Ascione, David Conran & Davide Depau for [IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Kelon.h) which I used for protocol reference
 - [@ezhevita](https://github.com/ezhevita) for additional research
 
 ## Limitations
-Kelon/Hisense protocol does not allow explicitly setting air conditioner's power state. Because this, `ensure_power` workaround is used – it sends a command that should set the AC to `on` state, so that we could ensure it is on or off by sending another command shotly after.
+Kelon/Hisense protocol does not allow explicitly setting air conditioner's power state. Because of this, `ensure_power` workaround is used – it sends a command that should set the AC to `on` state, so that we could ensure it is on or off by sending another command shortly after.
 
 ## Example
 
