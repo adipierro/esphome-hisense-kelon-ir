@@ -1,4 +1,4 @@
-# ESPHome Hisense/Kelon IR
+# ESPHome Hisense/Kelon AC IR control
 
 External ESPHome climate component for Hisense/Kelon air conditioners using the Kelon168 IR protocol.
 
