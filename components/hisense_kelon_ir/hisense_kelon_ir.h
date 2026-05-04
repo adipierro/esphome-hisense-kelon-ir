@@ -21,7 +21,8 @@ class HisenseKelonIRClimate : public climate_ir::ClimateIR {
             16.0f, 32.0f, 1.0f, true, true,
             {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
              climate::CLIMATE_FAN_HIGH},
-            {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL},
+            {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL,
+             climate::CLIMATE_SWING_BOTH},
             {climate::CLIMATE_PRESET_NONE, climate::CLIMATE_PRESET_SLEEP, climate::CLIMATE_PRESET_BOOST}) {}
 
   void setup() override;
@@ -58,6 +59,7 @@ class HisenseKelonIRClimate : public climate_ir::ClimateIR {
   bool ensure_power_on_boot_{false};
   bool follow_me_enabled_{false};
   uint8_t follow_me_temperature_{0};
+  uint8_t next_command_{KELON168_COMMAND_MODE};
 };
 
 using Kelon168Dumper = remote_base::RemoteReceiverDumper<Kelon168Protocol>;
