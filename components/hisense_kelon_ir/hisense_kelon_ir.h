@@ -41,7 +41,7 @@ class HisenseKelonIRClimate : public climate_ir::ClimateIR {
   Kelon168Data build_state_(climate::ClimateMode mode, float target_temperature,
                             climate::ClimateFanMode fan_mode, climate::ClimateSwingMode swing_mode,
                             climate::ClimatePreset preset, bool power_toggle, uint8_t command) const;
-  void transmit_kelon_(Kelon168Data data);
+  void transmit_kelon_(Kelon168Data data, bool remember = true);
   void ensure_power_on_();
   void apply_follow_me_(Kelon168Data *data) const;
   void apply_received_state_(const Kelon168Data &data);
