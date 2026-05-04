@@ -152,16 +152,18 @@ void HisenseKelonIRClimate::send_follow_me(float temperature, bool enabled) {
     return;
   }
 
-  auto data = this->have_last_tx_ ? this->last_tx_ : Kelon168Protocol::make_default();
   const bool state_changed = this->follow_me_enabled_ != enabled;
   this->follow_me_enabled_ = enabled;
   this->follow_me_temperature_ = static_cast<uint8_t>(lroundf(clamp(temperature, 0.0f, 50.0f)));
-  data.state[6] &= ~0x20;
-  data.state[11] = enabled ? KELON168_FOLLOW_ME_ENABLED : 0x00;
-  data.state[12] = this->follow_me_temperature_;
-  data.state[15] = state_changed ? KELON168_COMMAND_IFEEL : KELON168_COMMAND_LIGHT;
-  Kelon168Protocol::checksum(&data);
-  this->transmit_kelon_(data);
+
+  if (state_changed) {
+    auto data = this->build_follow_me_state_(this->follow_me_temperature_, enabled, false);
+    this->transmit_kelon_(data, false);
+  }
+  if (enabled) {
+    auto data = this->build_follow_me_state_(this->follow_me_temperature_, true, true);
+    this->transmit_kelon_(data, false);
+  }
 }
 
 void HisenseKelonIRClimate::send_display_off() {
@@ -190,10 +192,6 @@ void HisenseKelonIRClimate::apply_received_state_(const Kelon168Data &data) {
     if (follow_me_frame) {
       this->follow_me_enabled_ = (data.state[11] & KELON168_FOLLOW_ME_ENABLED) != 0;
       this->follow_me_temperature_ = data.state[12];
-      this->last_tx_ = data;
-      this->last_tx_.state[6] &= ~0x20;
-      Kelon168Protocol::checksum(&this->last_tx_);
-      this->have_last_tx_ = true;
     }
     ESP_LOGD(TAG, "Ignoring non-climate Kelon168 command 0x%02X for climate state", command);
     return;
@@ -269,6 +267,18 @@ Kelon168Data HisenseKelonIRClimate::build_state_(climate::ClimateMode mode, floa
 
   data.state[15] = command;
   this->apply_follow_me_(&data);
+  Kelon168Protocol::checksum(&data);
+  return data;
+}
+
+Kelon168Data HisenseKelonIRClimate::build_follow_me_state_(uint8_t temperature, bool enabled, bool update) const {
+  auto data = Kelon168Protocol::make_default();
+  data.state[3] = (KELON168_MODE_COOL & 0x07) | ((24 - 16) << 4);
+  data.state[6] = update ? 0x08 : 0x87;
+  data.state[7] = update ? 0x03 : 0x3B;
+  data.state[11] = enabled ? KELON168_FOLLOW_ME_ENABLED : 0x00;
+  data.state[12] = enabled ? temperature : 0x00;
+  data.state[15] = update ? KELON168_COMMAND_LIGHT : KELON168_COMMAND_IFEEL;
   Kelon168Protocol::checksum(&data);
   return data;
 }
