@@ -98,6 +98,10 @@ void HisenseKelonIRClimate::control(const climate::ClimateCall &call) {
   this->should_ensure_power_ =
       this->ensure_power_ != ENSURE_POWER_NONE && (!was_known || was_on != will_be_on);
   this->next_command_ = command;
+  if (was_on != will_be_on) {
+    this->follow_me_enabled_ = false;
+    this->follow_me_temperature_ = 0;
+  }
 
   if (!will_be_on && !was_on) {
     ESP_LOGD(TAG, "Climate is off; storing preference change without sending IR");
@@ -138,6 +142,11 @@ void HisenseKelonIRClimate::transmit_state() {
 }
 
 void HisenseKelonIRClimate::send_follow_me(float temperature, bool enabled) {
+  if (this->mode == climate::CLIMATE_MODE_OFF) {
+    ESP_LOGD(TAG, "Skipping follow-me command because climate is off");
+    return;
+  }
+
   if (!std::isfinite(temperature)) {
     ESP_LOGW(TAG, "Skipping follow-me command because temperature is unavailable");
     return;
@@ -189,6 +198,8 @@ void HisenseKelonIRClimate::apply_received_state_(const Kelon168Data &data) {
   if (data.state[2] & 0x04) {
     if (this->power_known_) {
       this->mode = this->mode == climate::CLIMATE_MODE_OFF ? climate::CLIMATE_MODE_HEAT_COOL : climate::CLIMATE_MODE_OFF;
+      this->follow_me_enabled_ = false;
+      this->follow_me_temperature_ = 0;
     } else {
       ESP_LOGW(TAG, "Received power-toggle frame before power state was known; leaving climate mode unchanged");
     }
