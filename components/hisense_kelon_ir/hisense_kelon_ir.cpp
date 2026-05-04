@@ -98,10 +98,6 @@ void HisenseKelonIRClimate::control(const climate::ClimateCall &call) {
   this->should_ensure_power_ =
       this->ensure_power_ != ENSURE_POWER_NONE && (!was_known || was_on != will_be_on);
   this->next_command_ = command;
-  if (was_on != will_be_on) {
-    this->follow_me_enabled_ = false;
-    this->follow_me_temperature_ = 0;
-  }
 
   if (!will_be_on && !was_on) {
     ESP_LOGD(TAG, "Climate is off; storing preference change without sending IR");
@@ -122,6 +118,8 @@ void HisenseKelonIRClimate::transmit_state() {
   if (this->mode == climate::CLIMATE_MODE_OFF) {
     if (this->should_ensure_power_)
       this->ensure_power_on_();
+    this->follow_me_enabled_ = false;
+    this->follow_me_temperature_ = 0;
     auto off = this->build_state_(climate::CLIMATE_MODE_OFF, this->target_temperature, fan, this->swing_mode, preset, true,
                                   KELON168_COMMAND_POWER);
     this->transmit_kelon_(off);
