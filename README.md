@@ -4,6 +4,8 @@ External ESPHome climate component for Hisense/Kelon air conditioners using the 
 
 This component is implemented against ESPHome's `remote_transmitter`, `remote_receiver`, and `remote_base` APIs. It does not use Arduino-only IR libraries.
 
+⚠️ there are currently some issues with swing mode control and follow-me (iFeel). I plan to fix those before June 2026.
+
 ## Acknowledgements
 - ESPhome community for ESPhome project
 - Leonardo Ascione, David Conran & Davide Depau for [IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Kelon.h) which I used for protocol reference
